@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import json
 
 class RandomTable(pd.DataFrame):
     def __init__(self,df):
@@ -8,15 +9,34 @@ class RandomTable(pd.DataFrame):
 
     def randommizeNotStr(self,el,col):
         return np.random.randint(self[col].min(), self[col].max())
+    
+    def scanJson(self, el,tan, buffer):
+      if type(el) == list:
+        i = 0
+        while i < tan:
+          self.scanJson(el[i], len(el[i]), buffer)
+          i +=1
+      elif type(el) == str:
+        el = json.loads(el)
+        self.scanJson(el, len(el), buffer)
+      else:
+        if type(list(el.values())[0]) == list:
+          self.scanJson(list(el.values())[0], len(list(el.values())[0]), buffer)
+        else:
+          buffer.append(el)
+      return buffer
 
     def randommizeJson(self,el):
-        dic = Json.loads(el)
-        keys = list(dic.keys())
-        values = list(dic.values())
-        for i in range(len(keys)):
-            keys[i] = np.random.choice(list(keys[i]),len(list(keys[i])),replace=False)
-            values[i] = np.random.choice(list(values[i]),len(list(values[i])),replace=False)
-        return [(k,v) for k,v in zip(keys,values)]
+        newDict = {}
+        dic = json.loads(el)
+        keys = list(dic.keys()) if type(dic) == dict else ['LIST']  #list(dic.keys())
+        values = self.scanJson(dic,len(dic), [])
+        for ob in values:
+          for key in ob.keys():
+            keyRandom = ''.join(np.random.choice(list(key),len(key),replace=False))
+            valueRandom = ''.join(np.random.choice(list(str(ob[key])),len(list(str(ob[key]))),replace=False))
+            newDict[keyRandom] = valueRandom
+        return newDict
 
     def isJson(self, el):
         return True if (el[0]=='{' or el[1]=='{') and (el[-1]=='}' or el[-2]=='}') else False
