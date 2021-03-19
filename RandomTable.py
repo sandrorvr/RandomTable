@@ -36,6 +36,12 @@ class RandomTable(pd.DataFrame):
             keyRandom = ''.join(np.random.choice(list(key),len(key),replace=False))
             valueRandom = ''.join(np.random.choice(list(str(ob[key])),len(list(str(ob[key]))),replace=False))
             newDict[keyRandom] = valueRandom
+
+        if len(values) > 1 and keys[0] != 'LIST':
+          vetAux = []
+          vetAux.append(newDict)
+          keyRandom = ''.join(np.random.choice(list(keys[0]),len(keys[0]),replace=False))
+          return {keyRandom:vetAux}
         return newDict
 
     def isJson(self, el):
